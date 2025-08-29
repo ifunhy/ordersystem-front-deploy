@@ -1,0 +1,40 @@
+# 워크플로우 이름 (GitHub Actions 탭에서 보이는 이름)
+name: deploy to s3, cloudfront
+# 워크플로우 실행 조건(이벤트 정의(트리거))
+on:
+  push:                                                 # push 이벤트가 발생했을 때
+      branches:
+        - main                                          # main 브랜치에 push될 때만 실행
+jobs:                                                   # 실제 실행할 작업 정의
+  build-and-deploy:                                     # job 이름 (원하는 이름으로 가능)
+    runs-on: ubuntu-latest                              # GitHub이 제공하는 Ubuntu 최신 버전 환경에서 실행
+    steps:                                              # job 안에서 실행되는 단계들
+      # uses: 재사용이 가능한 사전에 만들어진 작업 절차(이미 만들어진 액션을 재사용)
+      - uses: actions/checkout@v2                       # 현재 저장소 코드 체크아웃(다운로드)
+
+      - name: setup nodejs                              # Node.js 실행 환경 세팅
+        uses: actions/setup-node@v2                     # Node.js 환경을 제공하는 액션
+        with:
+          node-version: '22'                            # 사용할 Node.js 버전 (예: 22)
+
+      # run: 개발자가 직접 작업을 정의 (직접 커맨드 실행)
+      - name: npm install                               # 의존성 설치 단계
+        working-directory: .                            # 현재 디렉토리(.)에서 실행
+        run: npm install                                # npm install 실행
+
+      - name: npm build                                 # 빌드 단계
+        working-directory: .
+        run: npm run build                              # 프로젝트 빌드 실행 (dist 폴더 생성 등)
+
+      - name: setup aws cli                             # AWS CLI 인증 세팅 단계
+        uses: aws-actions/configure-aws-credentials@v2  # AWS 자격 증명 설정 액션
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}      # AWS IAM 사용자의 Access Key (보통은 GitHub Secrets에서 불러옴)
+          aws-secret-access-key: ${{secrets.AWS_SECRET_KEY}}  # AWS IAM 사용자의 Secret Key (보통은 GitHub Secrets에서 불러옴)
+          aws-region: "ap-north-east-2"                       # 사용할 AWS 리전 (예: 서울 리전은 ap-northeast-2)
+
+      - name: deploy to s3
+        run: aws s3 cp ./dist s3://www.jikiki.shop/ --recursive
+
+      - name: invalidate cloudfront
+        run: aws cloudfront create-invalidation --distribution-id E1IW802KT201MF aths "/*"

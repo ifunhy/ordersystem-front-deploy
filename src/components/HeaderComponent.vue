@@ -11,7 +11,7 @@
                     </div>
                 </v-col>
                 <v-col class="text-center">
-                    <v-btn :to="'/'">devops shop</v-btn>  <!-- :to="'/'" : home 경로로 감-->
+                    <v-btn :to="'/'">devops shop automation</v-btn>  <!-- :to="'/'" : home 경로로 감-->
                 </v-col>
                 <v-col class="d-flex justify-end">      <!-- justify-end : 오른쪽 기준 정렬 -->
                     <v-btn v-if="isLogined" :to="'/order/cart'">장바구니 {{ totalQuantity }}</v-btn>    <!-- 전역상태관리하여 totalQuantity 값 업데이트 -->

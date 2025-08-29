@@ -31,10 +31,10 @@ jobs:                                                   # 실제 실행할 작�
         with:
           aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}      # AWS IAM 사용자의 Access Key (보통은 GitHub Secrets에서 불러옴)
           aws-secret-access-key: ${{secrets.AWS_SECRET_KEY}}  # AWS IAM 사용자의 Secret Key (보통은 GitHub Secrets에서 불러옴)
-          aws-region: "ap-north-east-2"                       # 사용할 AWS 리전 (예: 서울 리전은 ap-northeast-2)
+          aws-region: "ap-northeast-2"                       # 사용할 AWS 리전 (예: 서울 리전은 ap-northeast-2)
 
-      - name: deploy to s3
+      - name: deploy to s3                              # dist 폴더의 정적 파일들을 S3 버킷 루트로 업로드
         run: aws s3 cp ./dist s3://www.jikiki.shop/ --recursive
 
-      - name: invalidate cloudfront
-        run: aws cloudfront create-invalidation --distribution-id E1IW802KT201MF aths "/*"
+      - name: invalidate cloudfront                     # CloudFront 캐시 무효화: 배포ID 대상의 모든 경로를 갱신
+        run: aws cloudfront create-invalidation --distribution-id E1IW802KT201MF --paths "/*"
